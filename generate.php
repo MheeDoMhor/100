@@ -287,7 +287,7 @@ function calendar()
 
 $calender = calendar();
 
-$myfile = fopen("dist/calendar.csv", "w") or die("Unable to open file!");
+$myfile = fopen("calendar.csv", "w") or die("Unable to open file!");
 $txt = "anno_domini,buddhist_era,gregorian_month,gregorian_month_day,thai_zodiac_year,week_day,thai_month,moon_phases,moon_phases_day\n";
 fwrite($myfile, $txt);
 
