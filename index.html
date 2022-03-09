@@ -15,11 +15,22 @@
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
 </head>
 <body>
-    <h1>^O^</h1>
-    <table id="calendar">
-        <thead></thead>
-        <tbody></tbody>
-    </table>
+    <div class="container-fluid">
+        <h1>^O^</h1>
+        <table id="calendar">
+            <thead>
+                <tr>
+                    <th>ค.ศ.</th>
+                    <th>พ.ศ.</th>
+                    <th>เดือน</th>
+                    <th>วันที่</th>
+                    <th>ปีนักษัตร</th>
+                    <th>วันตามปฏิทินไทย</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </body>
 <script>
 
@@ -37,25 +48,82 @@
             var nCol = calendar[0].length;
             var nRow = calendar.length;
 
-            var header = '<tr>';
-            for(let i = 0; i < nCol; i++) {
-                header += '<th>' + calendar[0][i] + '</th>';
-            }
-            header += '</tr>';
-            $('#calendar > thead').html(header);
+            // var header = '<tr>';
+            // for(let i = 0; i < nCol; i++) {
+            //     header += '<th>' + calendar[0][i] + '</th>';
+            // }
+            // header += '</tr>';
+            // $('#calendar > thead').html(header);
 
             var body = "";
             for(let i = 1; i < nRow - 1; i++) {
                 body += '<tr>';
-                for(let j = 0; j < nCol; j++){
-                    body += '<td>' + calendar[i][j] + '</td>';
-                }
+                // for(let j = 0; j < nCol; j++){
+                //     body += '<td>' + calendar[i][j] + '</td>';
+                // }
+                body += '<td>' + calendar[i][0] + '</td>';
+                body += '<td>' + calendar[i][1] + '</td>';
+                body += '<td>' + calendar[i][2] + '</td>';
+                body += '<td>' + calendar[i][3] + '</td>';
+
+                let zodiacYear = calendar[i][4];
+                let zodiacYearDisplay = "";
+                if(zodiacYear == 1) zodiacYearDisplay = 'ชวด';
+                else if(zodiacYear == 2) zodiacYearDisplay = 'ฉลู';
+                else if(zodiacYear == 3) zodiacYearDisplay = 'ขาล';
+                else if(zodiacYear == 4) zodiacYearDisplay = 'เถาะ';
+                else if(zodiacYear == 5) zodiacYearDisplay = 'มะโรง';
+                else if(zodiacYear == 6) zodiacYearDisplay = 'มะเส็ง';
+                else if(zodiacYear == 7) zodiacYearDisplay = 'มะเมีย';
+                else if(zodiacYear == 8) zodiacYearDisplay = 'มะแม';
+                else if(zodiacYear == 9) zodiacYearDisplay = 'วอก';
+                else if(zodiacYear == 10) zodiacYearDisplay = 'ระกา';
+                else if(zodiacYear == 11) zodiacYearDisplay = 'จอ';
+                else if(zodiacYear == 12) zodiacYearDisplay = 'กุน';
+                body += '<td>' + zodiacYearDisplay + '</td>';
+
+                let weekDay = calendar[i][5];
+                let weekDayDisplay = 'วัน';
+                if(weekDay == 1) weekDayDisplay += 'อาทิตย์';
+                else if(weekDay == 2) weekDayDisplay += 'จันทร์';
+                else if(weekDay == 3) weekDayDisplay += 'อังคาร';
+                else if(weekDay == 4) weekDayDisplay += 'พุธ';
+                else if(weekDay == 5) weekDayDisplay += 'พฤหัสบดี';
+                else if(weekDay == 6) weekDayDisplay += 'ศุกร์';
+                else if(weekDay == 7) weekDayDisplay += 'เสาร์';
+
+                let thaiMonth = calendar[i][6];
+                let thaiMonthDisplay = '';
+                if(thaiMonth == 1) thaiMonthDisplay = 'เดือนอ้าย(1)';
+                else if(thaiMonth == 2) thaiMonthDisplay = 'เดือนยี่(2)';
+                else if(thaiMonth == 3) thaiMonthDisplay = 'เดือนสาม(3)';
+                else if(thaiMonth == 4) thaiMonthDisplay = 'เดือนสี่(4)';
+                else if(thaiMonth == 5) thaiMonthDisplay = 'เดือนห้า(5)';
+                else if(thaiMonth == 6) thaiMonthDisplay = 'เดือนหก(6)';
+                else if(thaiMonth == 7) thaiMonthDisplay = 'เดือนเจ็ด(7)';
+                else if(thaiMonth == 8) thaiMonthDisplay = 'เดือนแปด(8)';
+                else if(thaiMonth == 9) thaiMonthDisplay = 'เดือนเก้า(9)';
+                else if(thaiMonth == 10) thaiMonthDisplay = 'เดือนสิบ(10)';
+                else if(thaiMonth == 11) thaiMonthDisplay = 'เดือนสิบเอ็ด(11)';
+                else if(thaiMonth == 12) thaiMonthDisplay = 'เดือนสิบสอง(12)';
+
+                let moonPhases = calendar[i][7];
+                let moonPhasesDisplay = (moonPhases == 1 ? 'ขึ้น' : 'แรม');
+
+                let moonPhasesDay = calendar[i][8];
+
+                body += '<td>' + weekDayDisplay + ' ' + moonPhasesDisplay + ' ' + moonPhasesDay + ' ค่ำ ' + thaiMonthDisplay + '</td>';
                 body += '</tr>';
             }
             $('#calendar > tbody').html(body);
 
         }).done(function () {
-            $('#calendar').DataTable();
+            $('#calendar').DataTable({
+                "paging": false,
+                //"ordering": false,
+                "info": false,
+                "searching": false,
+            });
         });
     });
 
