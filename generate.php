@@ -231,7 +231,6 @@ function calendar()
             for($up = 1; $up <= 15; $up++)
             {
                 $d = date_format($date, 'w Y-m-d');
-                date_add($date, date_interval_create_from_date_string('1 days'));
                 echo($d . " = " . $month . ($month == 8 && $monthEightCount == 2 ? '8' : '') . "-ข-" . $up . " ปีนักษัตร : " . $ay .  "<br/>");
                 
                 $calender[] = [
@@ -245,13 +244,14 @@ function calendar()
                     'moon_phases' => 1,
                     'moon_phases_day' => (int)$up,
                 ];
+
+                date_add($date, date_interval_create_from_date_string('1 days'));
             }
             
             $downLimit = (($month % 2 != 1) || ($type == 1 && $month == 7) ? 15 : 14);
             for($down = 1; $down <= $downLimit; $down++)
             {
                 $d = date_format($date, 'w Y-n-d');
-                date_add($date, date_interval_create_from_date_string('1 days'));
                 echo($d . " = " . $month . ($month == 8 && $monthEightCount == 2 ? '8' : '') . "-ร-" . $down . " ปีนักษัตร : " . $ay .  "<br/>");
 
                 $calender[] = [
@@ -265,6 +265,8 @@ function calendar()
                     'moon_phases' => 2,
                     'moon_phases_day' => (int)$down,
                 ];
+
+                date_add($date, date_interval_create_from_date_string('1 days'));
             }
             
             echo("--------------------<br/>");
@@ -287,7 +289,9 @@ function calendar()
 
 $calender = calendar();
 
-$myfile = fopen("calendar.csv", "w") or die("Unable to open file!");
+// generate csv
+
+$myfile = fopen("csv/calendar.csv", "w") or die("Unable to open file!");
 $txt = "anno_domini,buddhist_era,gregorian_month,gregorian_month_day,thai_zodiac_year,week_day,thai_month,moon_phases,moon_phases_day\n";
 fwrite($myfile, $txt);
 
@@ -307,3 +311,29 @@ foreach($calender as $date)
 }
 
 fclose($myfile);
+
+// generate json
+
+$year = -1;
+$myfile = fopen("json/start.json", "w") or die("Unable to open file!");
+$array = [];
+
+foreach($calender as $date)
+{
+    if((int)$date['anno_domini'] != $year)
+    {
+        $year = (int)$date['anno_domini'];
+        $txt = json_encode($array);
+        fwrite($myfile, $txt);
+        fclose($myfile);
+        $array = [];
+        $myfile = fopen('json/' . $date['anno_domini'] . ".json", "w") or die("Unable to open file!");
+    }
+
+    $array[] = $date;
+}
+
+$txt = json_encode($array);
+fwrite($myfile, $txt);
+fclose($myfile);
+        
