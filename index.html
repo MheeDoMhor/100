@@ -113,6 +113,27 @@
             border: 2px solid var(--today-border);
         }
 
+        .day-cell.selected-highlight {
+            background-color: #d4edda !important;
+            border: 2px solid #28a745 !important;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
         .date-number {
             font-size: 1.2rem;
             font-weight: bold;
@@ -218,12 +239,39 @@
         </div>
 
         <!-- Toolbar -->
-        <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-outline-primary btn-sm me-2" id="goToday">วันนี้</button>
-            <select id="yearSelect" class="form-select form-select-sm w-auto d-inline-block">
-                <!-- JS will populate -->
-            </select>
+        <div class="row g-2 mb-3 align-items-center justify-content-end">
+            <div class="col-auto">
+                <select id="searchDay" class="form-select form-select-sm">
+                    <option value="" disabled selected>วัน</option>
+                    <!-- JS Populate -->
+                </select>
+            </div>
+            <div class="col-auto">
+                <select id="searchMonth" class="form-select form-select-sm">
+                    <option value="" disabled selected>เดือน</option>
+                    <!-- JS Populate -->
+                </select>
+            </div>
+            <div class="col-auto">
+                <select id="searchYear" class="form-select form-select-sm">
+                    <option value="" disabled selected>พ.ศ.</option>
+                    <!-- JS Populate -->
+                </select>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary btn-sm" id="btnSearchGo"><i class="fas fa-search"></i> ค้นหา</button>
+            </div>
+            <div class="col-auto border-start ps-3 ms-2">
+                <button class="btn btn-outline-primary btn-sm" id="goToday">วันนี้</button>
+            </div>
         </div>
+
+        <!-- Hidden because we replaced functionality but keeping for structure if needed -->
+        <!-- <div class="d-flex justify-content-end mb-3"> -->
+        <select id="yearSelect" class="form-select form-select-sm w-auto d-none">
+            <!-- JS will populate -->
+        </select>
+        <!-- </div> -->
 
         <div class="weekdays">
             <div style="color: #e74c3c;">อาทิตย์</div>
@@ -325,6 +373,7 @@
 
         // --- State ---
         let currentDate = new Date();
+        let highlightDate = null; // Store searched date to highlight
 
         // --- Logic ---
 
@@ -482,6 +531,15 @@
 
                 let isToday = isCurrentMonth && today.getDate() === d;
 
+                // Highlight Searched Date
+                let isHighlight = false;
+                if (highlightDate &&
+                    highlightDate.getFullYear() === year &&
+                    highlightDate.getMonth() === month &&
+                    highlightDate.getDate() === d) {
+                    isHighlight = true;
+                }
+
                 // Wan Phra Check (8, 15 Waxing or 8, 15/14 Waning)
                 let isWanPhra = false;
                 if (tData.phaseDay === 8 || tData.phaseDay === 15) isWanPhra = true;
@@ -496,7 +554,7 @@
                 // Simplify for now: 8 and 15
 
                 let cellHtml = `
-                <div class="day-cell day-col-${(startDayIndex + d - 1) % 7} ${isToday ? 'today' : ''}" 
+                <div class="day-cell day-col-${(startDayIndex + d - 1) % 7} ${isToday ? 'today' : ''} ${isHighlight ? 'selected-highlight' : ''}" 
                      data-date="${d}" data-thai="${tData.thaiDate}" data-zodiac="${tData.zodiac}" data-phase="${tData.phase}">
                     <div class="date-number">${d}</div>
                     <div class="thai-date">${tData.thaiDate}</div>
@@ -510,8 +568,19 @@
         // --- Events ---
         $(document).ready(function () {
             // Populate Year Select
+            // Populate Year Select (Both View and Search)
+            // Populate Days (1-31)
+            for (let i = 1; i <= 31; i++) {
+                $('#searchDay').append(`<option value="${i}">${i}</option>`);
+            }
+            // Populate Months
+            THAI_MONTHS.forEach((m, index) => {
+                $('#searchMonth').append(`<option value="${index}">${m}</option>`);
+            });
+
             YEAR_DATA.forEach(y => {
                 $('#yearSelect').append(`<option value="${y.ad}">${y.ad + 543}</option>`);
+                $('#searchYear').append(`<option value="${y.ad}">${y.ad + 543}</option>`);
             });
 
             renderCalendar();
@@ -528,6 +597,32 @@
 
             $('#goToday').click(() => {
                 currentDate = new Date();
+                highlightDate = null; // Clear highlight
+                renderCalendar();
+            });
+
+            $('#btnSearchGo').click(() => {
+                let d = parseInt($('#searchDay').val());
+                let m = parseInt($('#searchMonth').val());
+                let y = parseInt($('#searchYear').val());
+
+                if (!d || isNaN(m) || !y) {
+                    alert('กรุณาเลือก วัน เดือน ปี ให้ครบถ้วน');
+                    return;
+                }
+
+                // Set date
+                // Note: Month in Date constructor is 0-indexed
+                let newDate = new Date(y, m, d);
+
+                // Validate if day exists (e.g. 31 Feb)
+                if (newDate.getMonth() !== m) {
+                    alert('วันที่ไม่ถูกต้อง (เดือนนี้ไม่มีวันดังกล่าว)');
+                    return;
+                }
+
+                currentDate = newDate;
+                highlightDate = newDate; // Set highlight
                 renderCalendar();
             });
 
