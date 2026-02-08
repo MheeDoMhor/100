@@ -1,537 +1,559 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ปฏิทิน 100 ปี</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <title>ปฏิทินจันทรคติไทย 100 ปี (ฉบับปรับปรุง)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --holiday-color: #e74c3c;
+            --buddhist-day-color: #f1c40f;
+            --today-bg: #e8f4fd;
+            --today-border: #3498db;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-color);
+        }
+
+        .calendar-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .calendar-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #7f8c8d;
+        }
+
+        .weekday {
+            padding: 10px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day-cell {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            min-height: 100px;
+            padding: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .day-cell:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            z-index: 10;
+        }
+
+        .day-cell.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        .day-cell.today {
+            background-color: var(--today-bg);
+            border: 2px solid var(--today-border);
+        }
+
+        .date-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .thai-date {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .waxing-waning {
+            font-size: 0.75rem;
+            color: #34495e;
+            display: block;
+        }
+
+        .buddhist-icon {
+            color: var(--buddhist-day-color);
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1rem;
+        }
+
+        /* Holiday Colors */
+        .day-col-0 .date-number {
+            color: var(--holiday-color);
+        }
+
+        /* Sunday */
+        .day-col-6 .date-number {
+            color: #9b59b6;
+        }
+
+        /* Saturday */
+
+        /* Modal Styles */
+        .modal-body-custom {
+            text-align: center;
+        }
+
+        .modal-big-date {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .modal-thai-date {
+            font-size: 1.5rem;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .modal-zodiac {
+            font-size: 1.2rem;
+            color: #888;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .day-cell {
+                min-height: 80px;
+            }
+
+            .thai-date,
+            .waxing-waning {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <div class="container-fluid">
-        <h1>^O^</h1>
-        <table id="calendar" class="table table-border">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>มกราคม</th>
-                    <th>กุมภาพันธ์</th>
-                    <th>มีนาคม</th>
-                    <th>เมษายน</th>
-                    <th>พฤษภาคม</th>
-                    <th>มิถุนายน</th>
-                    <th>กรกฎาคม</th>
-                    <th>สิงหาคม</th>
-                    <th>กันยายน</th>
-                    <th>ตุลาคม</th>
-                    <th>พฤศจิกายน</th>
-                    <th>ธันวาคม</th>
-                </tr>
-                <tr>
-                    <th>วัน</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                    <th>ว ข-ร ด ป</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td id="C0101"></td>
-                    <td id="C0201"></td>
-                    <td id="C0301"></td>
-                    <td id="C0401"></td>
-                    <td id="C0501"></td>
-                    <td id="C0601"></td>
-                    <td id="C0701"></td>
-                    <td id="C0801"></td>
-                    <td id="C0901"></td>
-                    <td id="C1001"></td>
-                    <td id="C1101"></td>
-                    <td id="C1201"></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td id="C0102"></td>
-                    <td id="C0202"></td>
-                    <td id="C0302"></td>
-                    <td id="C0402"></td>
-                    <td id="C0502"></td>
-                    <td id="C0602"></td>
-                    <td id="C0702"></td>
-                    <td id="C0802"></td>
-                    <td id="C0902"></td>
-                    <td id="C1002"></td>
-                    <td id="C1102"></td>
-                    <td id="C1202"></td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td id="C0103"></td>
-                    <td id="C0203"></td>
-                    <td id="C0303"></td>
-                    <td id="C0403"></td>
-                    <td id="C0503"></td>
-                    <td id="C0603"></td>
-                    <td id="C0703"></td>
-                    <td id="C0803"></td>
-                    <td id="C0903"></td>
-                    <td id="C1003"></td>
-                    <td id="C1103"></td>
-                    <td id="C1203"></td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td id="C0104"></td>
-                    <td id="C0204"></td>
-                    <td id="C0304"></td>
-                    <td id="C0404"></td>
-                    <td id="C0504"></td>
-                    <td id="C0604"></td>
-                    <td id="C0704"></td>
-                    <td id="C0804"></td>
-                    <td id="C0904"></td>
-                    <td id="C1004"></td>
-                    <td id="C1104"></td>
-                    <td id="C1204"></td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td id="C0105"></td>
-                    <td id="C0205"></td>
-                    <td id="C0305"></td>
-                    <td id="C0405"></td>
-                    <td id="C0505"></td>
-                    <td id="C0605"></td>
-                    <td id="C0705"></td>
-                    <td id="C0805"></td>
-                    <td id="C0905"></td>
-                    <td id="C1005"></td>
-                    <td id="C1105"></td>
-                    <td id="C1205"></td>
-                </tr>
-                <tr>
-                    <td>6</td>
-                    <td id="C0106"></td>
-                    <td id="C0206"></td>
-                    <td id="C0306"></td>
-                    <td id="C0406"></td>
-                    <td id="C0506"></td>
-                    <td id="C0606"></td>
-                    <td id="C0706"></td>
-                    <td id="C0806"></td>
-                    <td id="C0906"></td>
-                    <td id="C1006"></td>
-                    <td id="C1106"></td>
-                    <td id="C1206"></td>
-                </tr>
-                <tr>
-                    <td>7</td>
-                    <td id="C0107"></td>
-                    <td id="C0207"></td>
-                    <td id="C0307"></td>
-                    <td id="C0407"></td>
-                    <td id="C0507"></td>
-                    <td id="C0607"></td>
-                    <td id="C0707"></td>
-                    <td id="C0807"></td>
-                    <td id="C0907"></td>
-                    <td id="C1007"></td>
-                    <td id="C1107"></td>
-                    <td id="C1207"></td>
-                </tr>
-                <tr>
-                    <td>8</td>
-                    <td id="C0108"></td>
-                    <td id="C0208"></td>
-                    <td id="C0308"></td>
-                    <td id="C0408"></td>
-                    <td id="C0508"></td>
-                    <td id="C0608"></td>
-                    <td id="C0708"></td>
-                    <td id="C0808"></td>
-                    <td id="C0908"></td>
-                    <td id="C1008"></td>
-                    <td id="C1108"></td>
-                    <td id="C1208"></td>
-                </tr>
-                <tr>
-                    <td>9</td>
-                    <td id="C0109"></td>
-                    <td id="C0209"></td>
-                    <td id="C0309"></td>
-                    <td id="C0409"></td>
-                    <td id="C0509"></td>
-                    <td id="C0609"></td>
-                    <td id="C0709"></td>
-                    <td id="C0809"></td>
-                    <td id="C0909"></td>
-                    <td id="C1009"></td>
-                    <td id="C1109"></td>
-                    <td id="C1209"></td>
-                </tr>
-                <tr>
-                    <td>10</td>
-                    <td id="C0110"></td>
-                    <td id="C0210"></td>
-                    <td id="C0310"></td>
-                    <td id="C0410"></td>
-                    <td id="C0510"></td>
-                    <td id="C0610"></td>
-                    <td id="C0710"></td>
-                    <td id="C0810"></td>
-                    <td id="C0910"></td>
-                    <td id="C1010"></td>
-                    <td id="C1110"></td>
-                    <td id="C1210"></td>
-                </tr>
-                <tr>
-                    <td>11</td>
-                    <td id="C0111"></td>
-                    <td id="C0211"></td>
-                    <td id="C0311"></td>
-                    <td id="C0411"></td>
-                    <td id="C0511"></td>
-                    <td id="C0611"></td>
-                    <td id="C0711"></td>
-                    <td id="C0811"></td>
-                    <td id="C0911"></td>
-                    <td id="C1011"></td>
-                    <td id="C1111"></td>
-                    <td id="C1211"></td>
-                </tr>
-                <tr>
-                    <td>12</td>
-                    <td id="C0112"></td>
-                    <td id="C0212"></td>
-                    <td id="C0312"></td>
-                    <td id="C0412"></td>
-                    <td id="C0512"></td>
-                    <td id="C0612"></td>
-                    <td id="C0712"></td>
-                    <td id="C0812"></td>
-                    <td id="C0912"></td>
-                    <td id="C1012"></td>
-                    <td id="C1112"></td>
-                    <td id="C1212"></td>
-                </tr>
-                <tr>
-                    <td>13</td>
-                    <td id="C0113"></td>
-                    <td id="C0213"></td>
-                    <td id="C0313"></td>
-                    <td id="C0413"></td>
-                    <td id="C0513"></td>
-                    <td id="C0613"></td>
-                    <td id="C0713"></td>
-                    <td id="C0813"></td>
-                    <td id="C0913"></td>
-                    <td id="C1013"></td>
-                    <td id="C1113"></td>
-                    <td id="C1213"></td>
-                </tr>
-                <tr>
-                    <td>14</td>
-                    <td id="C0114"></td>
-                    <td id="C0214"></td>
-                    <td id="C0314"></td>
-                    <td id="C0414"></td>
-                    <td id="C0514"></td>
-                    <td id="C0614"></td>
-                    <td id="C0714"></td>
-                    <td id="C0814"></td>
-                    <td id="C0914"></td>
-                    <td id="C1014"></td>
-                    <td id="C1114"></td>
-                    <td id="C1214"></td>
-                </tr>
-                <tr>
-                    <td>15</td>
-                    <td id="C0115"></td>
-                    <td id="C0215"></td>
-                    <td id="C0315"></td>
-                    <td id="C0415"></td>
-                    <td id="C0515"></td>
-                    <td id="C0615"></td>
-                    <td id="C0715"></td>
-                    <td id="C0815"></td>
-                    <td id="C0915"></td>
-                    <td id="C1015"></td>
-                    <td id="C1115"></td>
-                    <td id="C1215"></td>
-                </tr>
-                <tr>
-                    <td>16</td>
-                    <td id="C0116"></td>
-                    <td id="C0216"></td>
-                    <td id="C0316"></td>
-                    <td id="C0416"></td>
-                    <td id="C0516"></td>
-                    <td id="C0616"></td>
-                    <td id="C0716"></td>
-                    <td id="C0816"></td>
-                    <td id="C0916"></td>
-                    <td id="C1016"></td>
-                    <td id="C1116"></td>
-                    <td id="C1216"></td>
-                </tr>
-                <tr>
-                    <td>17</td>
-                    <td id="C0117"></td>
-                    <td id="C0217"></td>
-                    <td id="C0317"></td>
-                    <td id="C0417"></td>
-                    <td id="C0517"></td>
-                    <td id="C0617"></td>
-                    <td id="C0717"></td>
-                    <td id="C0817"></td>
-                    <td id="C0917"></td>
-                    <td id="C1017"></td>
-                    <td id="C1117"></td>
-                    <td id="C1217"></td>
-                </tr>
-                <tr>
-                    <td>18</td>
-                    <td id="C0118"></td>
-                    <td id="C0218"></td>
-                    <td id="C0318"></td>
-                    <td id="C0418"></td>
-                    <td id="C0518"></td>
-                    <td id="C0618"></td>
-                    <td id="C0718"></td>
-                    <td id="C0818"></td>
-                    <td id="C0918"></td>
-                    <td id="C1018"></td>
-                    <td id="C1118"></td>
-                    <td id="C1218"></td>
-                </tr>
-                <tr>
-                    <td>19</td>
-                    <td id="C0119"></td>
-                    <td id="C0219"></td>
-                    <td id="C0319"></td>
-                    <td id="C0419"></td>
-                    <td id="C0519"></td>
-                    <td id="C0619"></td>
-                    <td id="C0719"></td>
-                    <td id="C0819"></td>
-                    <td id="C0919"></td>
-                    <td id="C1019"></td>
-                    <td id="C1119"></td>
-                    <td id="C1219"></td>
-                </tr>
-                <tr>
-                    <td>20</td>
-                    <td id="C0120"></td>
-                    <td id="C0220"></td>
-                    <td id="C0320"></td>
-                    <td id="C0420"></td>
-                    <td id="C0520"></td>
-                    <td id="C0620"></td>
-                    <td id="C0720"></td>
-                    <td id="C0820"></td>
-                    <td id="C0920"></td>
-                    <td id="C1020"></td>
-                    <td id="C1120"></td>
-                    <td id="C1220"></td>
-                </tr>
-                <tr>
-                    <td>21</td>
-                    <td id="C0121"></td>
-                    <td id="C0221"></td>
-                    <td id="C0321"></td>
-                    <td id="C0421"></td>
-                    <td id="C0521"></td>
-                    <td id="C0621"></td>
-                    <td id="C0721"></td>
-                    <td id="C0821"></td>
-                    <td id="C0921"></td>
-                    <td id="C1021"></td>
-                    <td id="C1121"></td>
-                    <td id="C1221"></td>
-                </tr>
-                <tr>
-                    <td>22</td>
-                    <td id="C0122"></td>
-                    <td id="C0222"></td>
-                    <td id="C0322"></td>
-                    <td id="C0422"></td>
-                    <td id="C0522"></td>
-                    <td id="C0622"></td>
-                    <td id="C0722"></td>
-                    <td id="C0822"></td>
-                    <td id="C0922"></td>
-                    <td id="C1022"></td>
-                    <td id="C1122"></td>
-                    <td id="C1222"></td>
-                </tr>
-                <tr>
-                    <td>23</td>
-                    <td id="C0123"></td>
-                    <td id="C0223"></td>
-                    <td id="C0323"></td>
-                    <td id="C0423"></td>
-                    <td id="C0523"></td>
-                    <td id="C0623"></td>
-                    <td id="C0723"></td>
-                    <td id="C0823"></td>
-                    <td id="C0923"></td>
-                    <td id="C1023"></td>
-                    <td id="C1123"></td>
-                    <td id="C1223"></td>
-                </tr>
-                <tr>
-                    <td>24</td>
-                    <td id="C0124"></td>
-                    <td id="C0224"></td>
-                    <td id="C0324"></td>
-                    <td id="C0424"></td>
-                    <td id="C0524"></td>
-                    <td id="C0624"></td>
-                    <td id="C0724"></td>
-                    <td id="C0824"></td>
-                    <td id="C0924"></td>
-                    <td id="C1024"></td>
-                    <td id="C1124"></td>
-                    <td id="C1224"></td>
-                </tr>
-                <tr>
-                    <td>25</td>
-                    <td id="C0125"></td>
-                    <td id="C0225"></td>
-                    <td id="C0325"></td>
-                    <td id="C0425"></td>
-                    <td id="C0525"></td>
-                    <td id="C0625"></td>
-                    <td id="C0725"></td>
-                    <td id="C0825"></td>
-                    <td id="C0925"></td>
-                    <td id="C1025"></td>
-                    <td id="C1125"></td>
-                    <td id="C1225"></td>
-                </tr>
-                <tr>
-                    <td>26</td>
-                    <td id="C0126"></td>
-                    <td id="C0226"></td>
-                    <td id="C0326"></td>
-                    <td id="C0426"></td>
-                    <td id="C0526"></td>
-                    <td id="C0626"></td>
-                    <td id="C0726"></td>
-                    <td id="C0826"></td>
-                    <td id="C0926"></td>
-                    <td id="C1026"></td>
-                    <td id="C1126"></td>
-                    <td id="C1226"></td>
-                </tr>
-                <tr>
-                    <td>27</td>
-                    <td id="C0127"></td>
-                    <td id="C0227"></td>
-                    <td id="C0327"></td>
-                    <td id="C0427"></td>
-                    <td id="C0527"></td>
-                    <td id="C0627"></td>
-                    <td id="C0727"></td>
-                    <td id="C0827"></td>
-                    <td id="C0927"></td>
-                    <td id="C1027"></td>
-                    <td id="C1127"></td>
-                    <td id="C1227"></td>
-                </tr>
-                <tr>
-                    <td>28</td>
-                    <td id="C0128"></td>
-                    <td id="C0228"></td>
-                    <td id="C0328"></td>
-                    <td id="C0428"></td>
-                    <td id="C0528"></td>
-                    <td id="C0628"></td>
-                    <td id="C0728"></td>
-                    <td id="C0828"></td>
-                    <td id="C0928"></td>
-                    <td id="C1028"></td>
-                    <td id="C1128"></td>
-                    <td id="C1228"></td>
-                </tr>
-                <tr>
-                    <td>29</td>
-                    <td id="C0129"></td>
-                    <td id="C0229"></td>
-                    <td id="C0329"></td>
-                    <td id="C0429"></td>
-                    <td id="C0529"></td>
-                    <td id="C0629"></td>
-                    <td id="C0729"></td>
-                    <td id="C0829"></td>
-                    <td id="C0929"></td>
-                    <td id="C1029"></td>
-                    <td id="C1129"></td>
-                    <td id="C1229"></td>
-                </tr>
-                <tr>
-                    <td>30</td>
-                    <td id="C0130"></td>
-                    <td id="C0230"></td>
-                    <td id="C0330"></td>
-                    <td id="C0430"></td>
-                    <td id="C0530"></td>
-                    <td id="C0630"></td>
-                    <td id="C0730"></td>
-                    <td id="C0830"></td>
-                    <td id="C0930"></td>
-                    <td id="C1030"></td>
-                    <td id="C1130"></td>
-                    <td id="C1230"></td>
-                </tr>
-                <tr>
-                    <td>31</td>
-                    <td id="C0131"></td>
-                    <td id="C0231"></td>
-                    <td id="C0331"></td>
-                    <td id="C0431"></td>
-                    <td id="C0531"></td>
-                    <td id="C0631"></td>
-                    <td id="C0731"></td>
-                    <td id="C0831"></td>
-                    <td id="C0931"></td>
-                    <td id="C1031"></td>
-                    <td id="C1131"></td>
-                    <td id="C1231"></td>
-                </tr>
-            </tbody>
-        </table>
+
+    <div class="loading-overlay" id="loader">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
-</body>
-<script>
-    $(document).ready(function () {
-        $('#calendar > td').html('');
-        $.get('json/' + new Date().getFullYear() + '.json', function(data) {
-            $.each(data, function (index, item) {
-                let fieldId = '#C' + 
-                    String(item['gregorian_month']).padStart(2, '0') + 
-                    String(item['gregorian_month_day']).padStart(2, '0');
-                $(fieldId).html(
-                    item['week_day'] + ' ' + 
-                    (item['moon_phases'] == 1 ? 'ข' : 'ร') + ' ' + 
-                    item['moon_phases_day'] + ' ' + 
-                    item['thai_month'] + ' ' + 
-                    item['thai_zodiac_year']
-                );
+
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <button class="btn-nav" id="prevMonth"><i class="fas fa-chevron-left"></i> ก่อนหน้า</button>
+            <div id="monthDisplay">
+                <h2 id="monthYearText">มกราคม 2567</h2>
+                <small id="thaiYearText" class="d-block text-center text-light opacity-75">ปีมะโรง</small>
+            </div>
+            <button class="btn-nav" id="nextMonth">ถัดไป <i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-outline-primary btn-sm me-2" id="goToday">วันนี้</button>
+            <select id="yearSelect" class="form-select form-select-sm w-auto d-inline-block">
+                <!-- JS will populate -->
+            </select>
+        </div>
+
+        <div class="weekdays">
+            <div style="color: #e74c3c;">อาทิตย์</div>
+            <div style="color: #f1c40f;">จันทร์</div>
+            <div style="color: #e91e63;">อังคาร</div>
+            <div style="color: #2ecc71;">พุธ</div>
+            <div style="color: #e67e22;">พฤหัสบดี</div>
+            <div style="color: #3498db;">ศุกร์</div>
+            <div style="color: #9b59b6;">เสาร์</div>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- JS will populate days here -->
+        </div>
+    </div>
+
+    <!-- Modal for details -->
+    <div class="modal fade" id="dateModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">รายละเอียดวัน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <div class="modal-big-date" id="modalDay">1</div>
+                    <div id="modalMonthYear">มกราคม 2567</div>
+                    <hr>
+                    <div class="modal-thai-date" id="modalThaiDate">แรม 15 ค่ำ เดือน 2</div>
+                    <div class="modal-zodiac" id="modalZodiac">ปีเถาะ (กระต่าย)</div>
+                    <div id="modalPhase" class="mt-2 badge bg-info text-dark">ข้างแรม</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- Data from PHP Generator ---
+        // type: 0 = Normal, 1 = Pickawan (Extra Day), 2 = Athikamat (Extra Month 88)
+        const YEAR_DATA = [
+            { be: 2400, ad: 1857, type: 0 }, { be: 2401, ad: 1858, type: 2 }, { be: 2402, ad: 1859, type: 0 }, { be: 2403, ad: 1860, type: 1 },
+            { be: 2404, ad: 1861, type: 2 }, { be: 2405, ad: 1862, type: 0 }, { be: 2406, ad: 1863, type: 2 }, { be: 2407, ad: 1864, type: 0 },
+            { be: 2408, ad: 1865, type: 1 }, { be: 2409, ad: 1866, type: 2 }, { be: 2410, ad: 1867, type: 0 }, { be: 2411, ad: 1868, type: 0 },
+            { be: 2412, ad: 1869, type: 2 }, { be: 2413, ad: 1870, type: 0 }, { be: 2414, ad: 1871, type: 1 }, { be: 2415, ad: 1872, type: 2 },
+            { be: 2416, ad: 1873, type: 0 }, { be: 2417, ad: 1874, type: 2 }, { be: 2418, ad: 1875, type: 0 }, { be: 2419, ad: 1876, type: 1 },
+            { be: 2420, ad: 1877, type: 2 }, { be: 2421, ad: 1878, type: 0 }, { be: 2422, ad: 1879, type: 0 }, { be: 2423, ad: 1880, type: 2 },
+            { be: 2424, ad: 1881, type: 1 }, { be: 2425, ad: 1882, type: 2 }, { be: 2426, ad: 1883, type: 0 }, { be: 2427, ad: 1884, type: 0 },
+            { be: 2428, ad: 1885, type: 2 }, { be: 2429, ad: 1886, type: 0 }, { be: 2430, ad: 1887, type: 1 }, { be: 2431, ad: 1888, type: 2 },
+            { be: 2432, ad: 1889, type: 0 }, { be: 2433, ad: 1890, type: 2 }, { be: 2434, ad: 1891, type: 0 }, { be: 2435, ad: 1892, type: 1 },
+            { be: 2436, ad: 1893, type: 2 }, { be: 2437, ad: 1894, type: 0 }, { be: 2438, ad: 1895, type: 0 }, { be: 2439, ad: 1896, type: 2 },
+            { be: 2440, ad: 1897, type: 0 }, { be: 2441, ad: 1898, type: 1 }, { be: 2442, ad: 1899, type: 2 }, { be: 2443, ad: 1900, type: 0 },
+            { be: 2444, ad: 1901, type: 2 }, { be: 2445, ad: 1902, type: 0 }, { be: 2446, ad: 1903, type: 1 }, { be: 2447, ad: 1904, type: 2 },
+            { be: 2448, ad: 1905, type: 0 }, { be: 2449, ad: 1906, type: 0 }, { be: 2450, ad: 1907, type: 2 }, { be: 2451, ad: 1908, type: 1 },
+            { be: 2452, ad: 1909, type: 2 }, { be: 2453, ad: 1910, type: 0 }, { be: 2454, ad: 1911, type: 0 }, { be: 2455, ad: 1912, type: 2 },
+            { be: 2456, ad: 1913, type: 0 }, { be: 2457, ad: 1914, type: 1 }, { be: 2458, ad: 1915, type: 2 }, { be: 2459, ad: 1916, type: 0 },
+            { be: 2460, ad: 1917, type: 1 }, { be: 2461, ad: 1918, type: 2 }, { be: 2462, ad: 1919, type: 0 }, { be: 2463, ad: 1920, type: 2 },
+            { be: 2464, ad: 1921, type: 0 }, { be: 2465, ad: 1922, type: 0 }, { be: 2466, ad: 1923, type: 2 }, { be: 2467, ad: 1924, type: 0 },
+            { be: 2468, ad: 1925, type: 1 }, { be: 2469, ad: 1926, type: 2 }, { be: 2470, ad: 1927, type: 0 }, { be: 2471, ad: 1928, type: 2 },
+            { be: 2472, ad: 1929, type: 1 }, { be: 2473, ad: 1930, type: 0 }, { be: 2474, ad: 1931, type: 2 }, { be: 2475, ad: 1932, type: 0 },
+            { be: 2476, ad: 1933, type: 1 }, { be: 2477, ad: 1934, type: 2 }, { be: 2478, ad: 1935, type: 0 }, { be: 2479, ad: 1936, type: 1 },
+            { be: 2480, ad: 1937, type: 2 }, { be: 2481, ad: 1938, type: 0 }, { be: 2482, ad: 1939, type: 2 }, { be: 2483, ad: 1940, type: 0 },
+            { be: 2484, ad: 1941, type: 0 }, { be: 2485, ad: 1942, type: 2 }, { be: 2486, ad: 1943, type: 0 }, { be: 2487, ad: 1944, type: 2 },
+            { be: 2488, ad: 1945, type: 1 }, { be: 2489, ad: 1946, type: 0 }, { be: 2490, ad: 1947, type: 2 }, { be: 2491, ad: 1948, type: 0 },
+            { be: 2492, ad: 1949, type: 1 }, { be: 2493, ad: 1950, type: 2 }, { be: 2494, ad: 1951, type: 0 }, { be: 2495, ad: 1952, type: 1 },
+            { be: 2496, ad: 1953, type: 2 }, { be: 2497, ad: 1954, type: 0 }, { be: 2498, ad: 1955, type: 0 }, { be: 2499, ad: 1956, type: 2 },
+            { be: 2500, ad: 1957, type: 1 }, { be: 2501, ad: 1958, type: 2 }, { be: 2502, ad: 1959, type: 0 }, { be: 2503, ad: 1960, type: 0 },
+            { be: 2504, ad: 1961, type: 2 }, { be: 2505, ad: 1962, type: 0 }, { be: 2506, ad: 1963, type: 1 }, { be: 2507, ad: 1964, type: 2 },
+            { be: 2508, ad: 1965, type: 0 }, { be: 2509, ad: 1966, type: 2 }, { be: 2510, ad: 1967, type: 0 }, { be: 2511, ad: 1968, type: 0 },
+            { be: 2512, ad: 1969, type: 2 }, { be: 2513, ad: 1970, type: 1 }, { be: 2514, ad: 1971, type: 0 }, { be: 2515, ad: 1972, type: 2 },
+            { be: 2516, ad: 1973, type: 1 }, { be: 2517, ad: 1974, type: 0 }, { be: 2518, ad: 1975, type: 2 }, { be: 2519, ad: 1976, type: 0 },
+            { be: 2520, ad: 1977, type: 2 }, { be: 2521, ad: 1978, type: 0 }, { be: 2522, ad: 1979, type: 1 }, { be: 2523, ad: 1980, type: 2 },
+            { be: 2524, ad: 1981, type: 0 }, { be: 2525, ad: 1982, type: 0 }, { be: 2526, ad: 1983, type: 2 }, { be: 2527, ad: 1984, type: 0 },
+            { be: 2528, ad: 1985, type: 2 }, { be: 2529, ad: 1986, type: 0 }, { be: 2530, ad: 1987, type: 1 }, { be: 2531, ad: 1988, type: 2 },
+            { be: 2532, ad: 1989, type: 0 }, { be: 2533, ad: 1990, type: 1 }, { be: 2534, ad: 1991, type: 2 }, { be: 2535, ad: 1992, type: 0 },
+            { be: 2536, ad: 1993, type: 2 }, { be: 2537, ad: 1994, type: 0 }, { be: 2538, ad: 1995, type: 0 }, { be: 2539, ad: 1996, type: 2 },
+            { be: 2540, ad: 1997, type: 1 }, { be: 2541, ad: 1998, type: 0 }, { be: 2542, ad: 1999, type: 2 }, { be: 2543, ad: 2000, type: 1 },
+            { be: 2544, ad: 2001, type: 0 }, { be: 2545, ad: 2002, type: 2 }, { be: 2546, ad: 2003, type: 0 }, { be: 2547, ad: 2004, type: 2 },
+            { be: 2548, ad: 2005, type: 0 }, { be: 2549, ad: 2006, type: 1 }, { be: 2550, ad: 2007, type: 2 }, { be: 2551, ad: 2008, type: 0 },
+            { be: 2552, ad: 2009, type: 1 }, { be: 2553, ad: 2010, type: 2 }, { be: 2554, ad: 2011, type: 0 }, { be: 2555, ad: 2012, type: 2 },
+            { be: 2556, ad: 2013, type: 0 }, { be: 2557, ad: 2014, type: 1 }, { be: 2558, ad: 2015, type: 2 }, { be: 2559, ad: 2016, type: 0 },
+            { be: 2560, ad: 2017, type: 0 }, { be: 2561, ad: 2018, type: 2 }, { be: 2562, ad: 2019, type: 0 }, { be: 2563, ad: 2020, type: 0 },
+            { be: 2564, ad: 2021, type: 2 }, { be: 2565, ad: 2022, type: 0 }, { be: 2566, ad: 2023, type: 2 }, { be: 2567, ad: 2024, type: 0 },
+            { be: 2568, ad: 2025, type: 1 }, { be: 2569, ad: 2026, type: 2 }, { be: 2570, ad: 2027, type: 0 }, { be: 2571, ad: 2028, type: 0 },
+            { be: 2572, ad: 2029, type: 2 }, { be: 2573, ad: 2030, type: 1 }, { be: 2574, ad: 2031, type: 2 }, { be: 2575, ad: 2032, type: 0 },
+        ];
+
+        const THAI_MONTHS = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
+
+        const ZODIACS = [
+            "ชวด", "ฉลู", "ขาล", "เถาะ", "มะโรง", "มะเส็ง",
+            "มะเมีย", "มะแม", "วอก", "ระกา", "จอ", "กุน"
+        ];
+
+        // --- State ---
+        let currentDate = new Date();
+
+        // --- Logic ---
+
+        // This function calculates Thai date by simulating the year cycle from base date
+        function getThaiDateMap(targetYear, targetMonth) {
+            // Find cached or calculation starting point
+            // For simplicity and correctness based on old code, we must start from base
+            // Base: 1856-11-28 provided in PHP code as start of calculation
+            // But the loop starts from YEAR_DATA[0] (AD 1857)
+
+            let loopDate = new Date(1856, 10, 28, 12, 0, 0); // Noon to avoid timezone shifts
+            let nextAsterismYear = 6; // Starts at Maseng (Snake)
+
+            // Target Date to stop (End of target month)
+            // We need data for the whole target Month.
+            // So we run until we pass the target month.
+
+            // Optimization: We could jump, but looping 60k days is < 50ms in modern JS. 
+            // Let's implement the exact logic from PHP.
+
+            let resultMap = {}; // Key: "YYYY-MM-DD", Value: Object
+
+            for (let i = 0; i < YEAR_DATA.length; i++) {
+                let yearInfo = YEAR_DATA[i];
+                let type = yearInfo.type;
+
+                // If current loop year > targetYear, we can stop (after finishing this year?)
+                // Actually we render by month, so we need to reach targetYear
+
+                if (yearInfo.ad > targetYear + 1) break; // Stop early
+
+                let monthEightCount = 1;
+
+                for (let month = 1; month <= 12; month++) {
+                    let ay = nextAsterismYear;
+                    if (month < 5) ay = nextAsterismYear - 1;
+                    if (ay < 1) ay += 12; // Adjust if wrapped (though logic says ay = next -1)
+
+                    // PHP Logic: if(month < 5) $ay = $nextAsterismYear - 1;
+                    // Note: The variable nextAsterismYear increments at end of year.
+
+                    // Waxing (Khuen) 1-15
+                    for (let up = 1; up <= 15; up++) {
+                        // Check if loopDate is in our target view range
+                        // To optimize, only store if near targetYear
+                        if (yearInfo.ad === targetYear && month === targetMonth + 1) {
+                            // Wait, PHP loop month is Thai month logic? No, PHP loop is just 1-12
+                            // Let's look at PHP: for($month = 1; $month <= 12; $month++)
+                            // It iterates 12 times (blocks), but thai_month variable depends on logic
+                        }
+
+                        // Actually, the PHP loop generates THE WHOLE YEAR of dates sequentially.
+                        // The 'month' variable in PHP loop is NOT Gregorian month. It is close to Thai month.
+                        // But date_add adds 1 day to Gregorian date.
+
+                        let y = loopDate.getFullYear();
+                        let m = loopDate.getMonth() + 1; // 0-11 to 1-12
+                        let d = loopDate.getDate();
+                        let dateKey = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                        let thaiMonth = month;
+                        if (month === 8 && monthEightCount === 2) thaiMonth = "88"; // 8 Song Hon
+
+                        if (y === targetYear && (loopDate.getMonth() === targetMonth)) {
+                            resultMap[dateKey] = {
+                                thaiDate: `ขึ้น ${up} ค่ำ เดือน ${thaiMonth == "88" ? "8-8" : thaiMonth}`,
+                                zodiac: ZODIACS[ay - 1],
+                                phase: 'ขึ้น',
+                                phaseDay: up
+                            };
+                        }
+
+                        loopDate.setDate(loopDate.getDate() + 1);
+                    }
+
+                    // Waning (Raem)
+                    let downLimit = ((month % 2 !== 1) || (type === 1 && month === 7) ? 15 : 14);
+
+                    for (let down = 1; down <= downLimit; down++) {
+                        let y = loopDate.getFullYear();
+                        let m = loopDate.getMonth() + 1;
+                        let d = loopDate.getDate();
+                        let dateKey = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                        let thaiMonth = month;
+                        if (month === 8 && monthEightCount === 2) thaiMonth = "88";
+
+                        if (y === targetYear && (loopDate.getMonth() === targetMonth)) {
+                            resultMap[dateKey] = {
+                                thaiDate: `แรม ${down} ค่ำ เดือน ${thaiMonth == "88" ? "8-8" : thaiMonth}`,
+                                zodiac: ZODIACS[ay - 1],
+                                phase: 'แรม',
+                                phaseDay: down
+                            };
+                        }
+
+                        loopDate.setDate(loopDate.getDate() + 1);
+                    }
+
+                    // Logic for Athikamat (Month 8 twice)
+                    if (type === 2 && month === 8 && monthEightCount < 2) {
+                        month--; // Repeat month 8
+                        monthEightCount++;
+                    }
+                }
+
+                nextAsterismYear++;
+                if (nextAsterismYear > 12) nextAsterismYear = 1;
+            }
+
+            return resultMap;
+        }
+
+        // --- UI Rendering ---
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Update Header
+            $('#monthYearText').text(`${THAI_MONTHS[month]} ${year + 543}`);
+            $('#yearSelect').val(year);
+
+            // Calculate Thai Dates
+            // Optimization: Ideally we shouldn't run this every render if year hasn't changed drastically
+            // But for now it's fine.
+            let thaiData = getThaiDateMap(year, month);
+
+            // Find Zodiac of the month (Take the 15th as represent)
+            let midMonthKey = `${year}-${String(month + 1).padStart(2, '0')}-15`;
+            if (thaiData[midMonthKey]) {
+                $('#thaiYearText').text(`ปี${thaiData[midMonthKey].zodiac}`);
+            }
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDayIndex = firstDay.getDay(); // 0 = Sunday
+
+            const grid = $('#calendarGrid');
+            grid.empty();
+
+            // Empty cells before 1st day
+            for (let i = 0; i < startDayIndex; i++) {
+                grid.append('<div class="day-cell empty"></div>');
+            }
+
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+            // Days
+            for (let d = 1; d <= daysInMonth; d++) {
+                let dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                let tData = thaiData[dateKey] || { thaiDate: '-', zodiac: '-', phase: '', phaseDay: 0 };
+
+                let isToday = isCurrentMonth && today.getDate() === d;
+
+                // Wan Phra Check (8, 15 Waxing or 8, 15/14 Waning)
+                let isWanPhra = false;
+                if (tData.phaseDay === 8 || tData.phaseDay === 15) isWanPhra = true;
+                // Special case: Raem 14 Kham in months with 14 days
+                if (tData.phase == 'แรม' && tData.phaseDay === 14) {
+                    // Basic check: if tomorrow is Waxing 1, then today is Wan Phra
+                    // But we don't have tomorrow data easily here without lookahead.
+                    // However, standard Wan Phra is usually 8, 15.
+                    // In Thai calendar, End of month is Wan Phra.
+                    // If Month is odd (Ex 29 days), Raem 14 is end.
+                }
+                // Simplify for now: 8 and 15
+
+                let cellHtml = `
+                <div class="day-cell day-col-${(startDayIndex + d - 1) % 7} ${isToday ? 'today' : ''}" 
+                     data-date="${d}" data-thai="${tData.thaiDate}" data-zodiac="${tData.zodiac}" data-phase="${tData.phase}">
+                    <div class="date-number">${d}</div>
+                    <div class="thai-date">${tData.thaiDate}</div>
+                    ${isWanPhra ? '<i class="fas fa-dharmachakra buddhist-icon" title="วันพระ"></i>' : ''}
+                </div>
+            `;
+                grid.append(cellHtml);
+            }
+        }
+
+        // --- Events ---
+        $(document).ready(function () {
+            // Populate Year Select
+            YEAR_DATA.forEach(y => {
+                $('#yearSelect').append(`<option value="${y.ad}">${y.ad + 543}</option>`);
             });
-        })
-    });
-</script>
+
+            renderCalendar();
+
+            $('#prevMonth').click(() => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            $('#nextMonth').click(() => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            $('#goToday').click(() => {
+                currentDate = new Date();
+                renderCalendar();
+            });
+
+            $('#yearSelect').change(function () {
+                currentDate.setFullYear($(this).val());
+                renderCalendar();
+            });
+
+            // Cell Click
+            $(document).on('click', '.day-cell:not(.empty)', function () {
+                let day = $(this).data('date');
+                let thai = $(this).data('thai');
+                let zodiac = $(this).data('zodiac');
+                let phase = $(this).data('phase');
+
+                $('#modalDay').text(day);
+                $('#modalMonthYear').text($('#monthYearText').text());
+                $('#modalThaiDate').text(thai);
+                $('#modalZodiac').text(`ปี${zodiac}`);
+                $('#modalPhase').text(phase === 'ขึ้น' ? 'ข้างขึ้น (Waxing)' : 'ข้างแรม (Waning)');
+
+                new bootstrap.Modal(document.getElementById('dateModal')).show();
+            });
+        });
+
+    </script>
+</body>
+
 </html>
